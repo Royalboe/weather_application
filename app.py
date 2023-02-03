@@ -1,14 +1,38 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 import requests
 import sys
 import json
 import datetime
+from flask_sqlalchemy import SQLAlchemy
 
+# create the extension object
+db = SQLAlchemy()
+
+# create the Flask app
 app = Flask(__name__)
 
-API_KEY = ''
+# configure the SQLite database, relative to the app instance folder
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///weather.db"
+
+# initialize the app with the extension
+db.init_app(app)
+
+API_KEY = '9c9072711700a5cf8bc1cd518bcb1db4'
 URL = 'https://api.openweathermap.org/data/2.5/weather'
 
+# create the database model
+class City(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+
+    def __repr__(self):
+        return f"City('{self.name}')"  # f-string
+
+# create the database tables
+with app.app_context():
+    db.create_all()
+
+# create the routes
 
 @app.route('/')
 def index():
@@ -19,6 +43,11 @@ def index():
 def add():
     if request.method == "POST":
         city = request.form.get('city_name')
+        if city:
+            new_city = City(name=city)
+            db.session.add(new_city)
+            db.session.commit()
+            return redirect(url_for('index'))
         params = {'q': city,
                   'limit': 1,
                   'appid': API_KEY}
