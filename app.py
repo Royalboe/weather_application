@@ -32,11 +32,24 @@ class City(db.Model):
 with app.app_context():
     db.create_all()
 
-# create the routes
 
+# create the routes
 @app.route('/')
 def index():
-    return render_template('index.html')
+    cities = City.query.all()
+    weather_data = []
+    for city in cities:
+        weather = get_city_weather(city.name)
+        weather_data.append(weather)
+    return render_template('index.html', weather_data=weather_data)
+
+
+@app.route('/delete/<name>')
+def delete(name):
+    city = City.query.filter_by(name=name).first()
+    db.session.delete(city)
+    db.session.commit()
+    return redirect(url_for('index'))
 
 
 @app.route('/add', methods=['POST'])
@@ -48,36 +61,39 @@ def add():
             db.session.add(new_city)
             db.session.commit()
             return redirect(url_for('index'))
-        params = {'q': city,
-                  'limit': 1,
-                  'appid': API_KEY}
-        # city_res = requests.get(f'http://api.openweathermap.org/data/2.5/forecast?id=524901&appid={API_KEY}')
-        city_res = requests.get('http://api.openweathermap.org/geo/1.0/direct', params=params).json()
-        city_res = json.dumps(city_res)
-        new_city_res = json.loads(city_res)
-        city_params = {
-            'lat': new_city_res[0]["lat"],
-            'lon': new_city_res[0]["lon"],
-            'appid': API_KEY,
-            'units': 'metric'
-        }
-        city_weather = requests.get(URL, params=city_params)
-        city_weather = json.loads(json.dumps(city_weather.json()))
-        day_ = parse_unix_time(city_weather["dt"] + city_weather["timezone"])
-        if 6 < day_ <= 18:
-            day_ = 'day'
-        elif 18 < day_ < 24:
-            day_ = 'night'
-        else:
-            day_ = 'evening-morning'
-        city_weather = {
-            'city': city_weather['name'],
-            'weather': city_weather['weather'][0]['main'],
-            'temp': city_weather["main"]['temp'],
-            'day_time': day_
-        }
-        return render_template('index.html', city_weather=city_weather)
+        redirect(url_for('index'))
+        
 
+def get_city_weather(city):
+    params = {'q': city,
+              'limit': 1,
+              'appid': API_KEY}
+    # city_res = requests.get(f'http://api.openweathermap.org/data/2.5/forecast?id=524901&appid={API_KEY}')
+    city_res = requests.get('http://api.openweathermap.org/geo/1.0/direct', params=params).json()
+    city_res = json.dumps(city_res)
+    new_city_res = json.loads(city_res)
+    city_params = {
+        'lat': new_city_res[0]["lat"],
+        'lon': new_city_res[0]["lon"],
+        'appid': API_KEY,
+        'units': 'metric'
+    }
+    city_weather = requests.get(URL, params=city_params)
+    city_weather = json.loads(json.dumps(city_weather.json()))
+    day_ = parse_unix_time(city_weather["dt"] + city_weather["timezone"])
+    if 6 < day_ <= 18:
+        day_ = 'day'
+    elif 18 < day_ < 24:
+        day_ = 'night'
+    else:
+        day_ = 'evening-morning'
+    city_weather = {
+        'city': city_weather['name'],
+        'weather': city_weather['weather'][0]['main'],
+        'temp': city_weather["main"]['temp'],
+        'day_time': day_
+    }
+    return city_weather
 
 
 def parse_unix_time(n):
