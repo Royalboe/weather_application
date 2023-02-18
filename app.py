@@ -1,6 +1,7 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, flash
 import requests
 import sys
+import os
 import json
 import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -17,7 +18,11 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///weather.db"
 # initialize the app with the extension
 db.init_app(app)
 
-API_KEY = '9c9072711700a5cf8bc1cd518bcb1db4'
+
+try:
+    API_KEY = str(os.environ["API_KEY"])
+except KeyError:
+    sys.exit("Can't find api_key!")
 URL = 'https://api.openweathermap.org/data/2.5/weather'
 
 # create the database model
@@ -30,6 +35,7 @@ class City(db.Model):
 
 # create the database tables
 with app.app_context():
+    # db.drop_all()
     db.create_all()
 
 
