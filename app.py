@@ -44,12 +44,12 @@ def index():
     return render_template('index.html', weather_data=weather_data)
 
 
-@app.route('/delete/<name>')
-def delete(name):
-    city = City.query.filter_by(name=name).first()
+@app.route('/delete/<city_id>', methods=['GET', 'POST'])
+def delete(city_id):
+    city = City.query.filter_by(id=city_id).first()
     db.session.delete(city)
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect('/')
 
 
 @app.route('/add', methods=['POST'])
