@@ -62,11 +62,19 @@ def delete(city_id):
 def add():
     if request.method == "POST":
         city = request.form.get('city_name')
+        # city = request.form['city_name']
+        exists = db.session.query(City.id).filter_by(name=city_name).first() is not None
+        if exists:
+            flash(f'The city has already been added to the list!')
+            return redirect(url_for('index'))
         if city:
             new_city = City(name=city)
             db.session.add(new_city)
             db.session.commit()
             return redirect(url_for('index'))
+        else:
+            flash("The city doesn't exist!")
+            return
         redirect(url_for('index'))
         
 
