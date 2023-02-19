@@ -63,7 +63,7 @@ def add():
     if request.method == "POST":
         city = request.form.get('city_name')
         # city = request.form['city_name']
-        exists = db.session.query(City.id).filter_by(name=city_name).first() is not None
+        exists = db.session.query(City.id).filter_by(name=city).first() is not None
         if exists:
             flash(f'The city has already been added to the list!')
             return redirect(url_for('index'))
@@ -74,8 +74,8 @@ def add():
             return redirect(url_for('index'))
         else:
             flash("The city doesn't exist!")
-            return
-        redirect(url_for('index'))
+            return redirect(url_for('index'))
+        
         
 
 def get_city_weather(city):
