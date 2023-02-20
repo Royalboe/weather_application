@@ -46,14 +46,14 @@ def index():
     cities = City.query.all()
     weather_data = []
     for city in cities:
-        weather = get_city_weather(city.name)
+        weather = get_city_weather(city)
         weather_data.append(weather)
     return render_template('index.html', weather_data=weather_data)
 
 
-@app.route('/delete/<city_name>', methods=['GET', 'POST'])
-def delete(city_name):
-    city = City.query.filter_by(name=city_name).first()
+@app.route('/delete/<city_id>', methods=['GET', 'POST'])
+def delete(city_id):
+    city = City.query.filter_by(id=city_id).first()
     db.session.delete(city)
     db.session.commit()
     return redirect('/')
@@ -80,7 +80,7 @@ def add():
         
 
 def get_city_weather(city):
-    params = {'q': city,
+    params = {'q': city.name,
               'limit': 1,
               'appid': API_KEY}
     # city_res = requests.get(f'http://api.openweathermap.org/data/2.5/forecast?id=524901&appid={API_KEY}')
@@ -103,7 +103,7 @@ def get_city_weather(city):
     else:
         day_ = 'evening-morning'
     city_weather = {
-        'city': city_weather['name'],
+        'city': city,
         'weather': city_weather['weather'][0]['main'],
         'temp': city_weather["main"]['temp'],
         'day_time': day_
