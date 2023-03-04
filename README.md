@@ -7,3 +7,7 @@ An application that takes the name of a city and returns the current weather con
 - Flask
 - Jinja
 - Python
+-
+
+## AUTHORS
+- Ayomide Johnson Salami
