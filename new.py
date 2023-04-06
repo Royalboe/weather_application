@@ -1,7 +1,6 @@
 import datetime
 import json
 import sys
-import os   
 
 import requests
 from flask import Flask, request, render_template, redirect, url_for, flash
@@ -22,11 +21,9 @@ db.init_app(app)
 
 
 
-try:
-    API_KEY = str(os.environ["API_KEY"])
-except KeyError:
-    sys.exit("Can't find api_key!")
-URL = 'http://api.openweathermap.org/data/2.5/weather'
+API_KEY = "9c9072711700a5cf8bc1cd518bcb1db4"
+URL = 'https://api.openweathermap.org/data/2.5/weather'
+# url = 'https://api.weatherapi.com/v1/current.json'
 
 
 # create the database model
@@ -95,21 +92,36 @@ def is_city_real(city):
         'units': 'metric'
     }
 
+    # URL = f"http://api.openweathermap.org/data/2.5/weather"
     response = requests.get(URL, params=city_params)
     res = response.json()
     code_ = int(res["cod"])
     if 400 <= code_ < 500:
         return False
     return True
+#     params = {'key': API_KEY, 'q': city, 'aqi': 'no'}
+#     resp_code = requests.get(url, params=params).status_code
+#     if 400 <= resp_code < 500:
+#         return False
+#     return True
 
 
 
 def get_city_weather(city):
+    # params = {'q': city.name,
+    #           'limit': 1,
+    #           'appid': API_KEY}
+    # # city_res = requests.get(f'http://api.openweathermap.org/data/2.5/forecast?id=524901&appid={API_KEY}')
+    # city_res = requests.get('http://api.openweathermap.org/geo/1.0/direct', params=params).json()
+    # city_res = json.dumps(city_res)
+    # new_city_res = json.loads(city_res)
     city_params = {
         'q': city.name,
         'appid': API_KEY,
         'units': 'metric'
     }
+
+    # URL = f"http://api.openweathermap.org/data/2.5/weather"
     city_weather = requests.get(URL, params=city_params)
     city_weather = json.loads(json.dumps(city_weather.json()))
     day_ = parse_unix_time(city_weather["dt"] + city_weather["timezone"])
