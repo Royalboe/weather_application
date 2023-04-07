@@ -20,13 +20,12 @@ app.secret_key = 'secret_key'
 # initialize the app with the extension
 db.init_app(app)
 
-
-
 try:
     API_KEY = str(os.environ["API_KEY"])
 except KeyError:
     sys.exit("Can't find api_key!")
-URL = 'http://api.openweathermap.org/data/2.5/weather'
+
+URL = 'https://api.openweathermap.org/data/2.5/weather'
 
 
 # create the database model
@@ -94,14 +93,12 @@ def is_city_real(city):
         'appid': API_KEY,
         'units': 'metric'
     }
-
     response = requests.get(URL, params=city_params)
     res = response.json()
     code_ = int(res["cod"])
     if 400 <= code_ < 500:
         return False
     return True
-
 
 
 def get_city_weather(city):
